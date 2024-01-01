@@ -12,7 +12,8 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
-		"test:unit": "vitest"
+		"test:unit": "vitest",
+		"generate-types": "supabase gen types typescript --local > src/lib/generated/supabase/types.ts"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",
@@ -34,5 +35,9 @@
 		"vite": "^5.0.3",
 		"vitest": "^1.0.0"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@supabase/ssr": "^0.0.10",
+		"@supabase/supabase-js": "^2.39.1"
+	}
 }
