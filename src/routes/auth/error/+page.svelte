@@ -11,6 +11,6 @@
 
 	<div>
 		Details for engineering:
-		<pre>{JSON.stringify([...searchParams?.entries()], null, 2)}</pre>
+		<pre>{JSON.stringify([...searchParams.entries()], null, 2)}</pre>
 	</div>
 </div>

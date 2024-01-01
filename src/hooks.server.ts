@@ -7,13 +7,13 @@ const createSupabaseClient: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 		cookies: {
 			get: (key) => event.cookies.get(key),
-			// NOTE: hardcoding path to '/' here to support Sveltekit v2 which requires it to be specified.
-			// For supabase cookies. we want them set on the whole domain.
+			// NOTE: defaulting path to '/' here to support Sveltekit v2 which requires it to be
+			// specified.
 			set: (key, value, options) => {
-				event.cookies.set(key, value, { ...options, path: '/' });
+				event.cookies.set(key, value, { path: '/', ...options });
 			},
 			remove: (key, options) => {
-				event.cookies.delete(key, { ...options, path: '/' });
+				event.cookies.delete(key, { path: '/', ...options });
 			}
 		}
 	});
