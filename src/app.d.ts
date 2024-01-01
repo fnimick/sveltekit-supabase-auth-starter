@@ -13,7 +13,9 @@ declare global {
 			getSession(): Promise<SupabaseSession | null>;
 		}
 
-		// interface PageData {}
+		interface PageData {
+			supabase: SupabaseClient<Database>;
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}
