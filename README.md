@@ -39,3 +39,24 @@ triggers an invalidation of all auth information when necessary. This is done vi
 specified in appropriate areas on `supabase:auth`. This ensures that e.g. the auth guard on the
 `/protected` route is re-run whenever a session change is detected, so the user can be navigated
 away if they are no longer logged in.
+
+## Magic Link Auth Notes
+
+Magic links work by saving a code verifier in the browser that requests the link, and using that
+along with the query params in the generated email link to verify the user.
+
+This can cause problems when users open the link in a different browser or device than the one they
+requested the link from - in particular, mobile app email clients use in-app browsers with different
+cookie stores than the main browser, so the code verifier is not present and the link will not work.
+
+To mitigate this, the `auth/callback` route conditionally renders a page if the code verifier is not
+present in the browser's cookies, rather than immediately attempting to call
+`supabase.auth.exchangeCodeForSession` which will fail if the code verifier is absent, and mark the
+link as used in the process (meaning the user cannot recover from this error by opening the current
+page in a new browser window). By deferring this call until the code verifier is present, we give
+the user an opportunity to open the link in the correct browser or device.
+
+To test this, open the magic link (from inbucket) in a different browser or device than the one you
+requested it from. You should see a page with a message about the code verifier not being present.
+Then, open the link in the same browser or device you requested it from, and you should be logged
+in.
