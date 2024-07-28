@@ -43,8 +43,8 @@ export async function load({ url, cookies, locals: { supabase } }) {
 		if (error) {
 			redirect(303, '/auth/error');
 		}
-	// https://github.com/supabase/gotrue-js/issues/782
-	} catch (error) {
+		// https://github.com/supabase/gotrue-js/issues/782
+	} catch {
 		redirect(303, '/auth/error');
 	}
 
