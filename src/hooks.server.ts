@@ -1,34 +1,52 @@
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import { createServerClient } from '@supabase/ssr';
+import type { Session } from '@supabase/supabase-js';
 import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 
 const createSupabaseClient: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 		cookies: {
-			get: (key) => event.cookies.get(key),
-			// NOTE: defaulting path to '/' here to support Sveltekit v2 which requires it to be
-			// specified.
-			set: (key, value, options) => {
-				event.cookies.set(key, value, { path: '/', ...options });
-			},
-			remove: (key, options) => {
-				event.cookies.delete(key, { path: '/', ...options });
+			getAll: () => event.cookies.getAll(),
+			setAll: (cookiesToSet) => {
+				cookiesToSet.forEach(({ name, value, options }) => {
+					event.cookies.set(name, value, { ...options, path: '/' });
+				});
 			}
 		}
 	});
 
 	/**
-	 * a little helper that is written for convenience so that instead
-	 * of calling `const { data: { session } } = await supabase.auth.getSession()`
-	 * you just call this `await getSession()`
+	 * Unlike `supabase.auth.getSession()`, which returns the session _without_
+	 * validating the JWT, this function also calls `getUser()` to validate the
+	 * JWT before returning the session.
 	 */
-	event.locals.getSession = async () => {
+	event.locals.safeGetSession = async () => {
 		const {
 			data: { session }
 		} = await event.locals.supabase.auth.getSession();
-		return session;
+		if (!session) {
+			return { session: null, user: null };
+		}
+
+		const {
+			data: { user },
+			error
+		} = await event.locals.supabase.auth.getUser();
+		if (error) {
+			// JWT validation has failed
+			return { session: null, user: null };
+		}
+
+		// workaround for user object use message, see https://github.com/supabase/auth-js/issues/873#issuecomment-2081467385
+		const newSession: Omit<Session, 'user'> & { user?: Session['user'] } = session;
+		delete newSession.user;
+		return { session: Object.assign({}, newSession, { user }), user };
 	};
+
+	const { session, user } = await event.locals.safeGetSession();
+	event.locals.session = session;
+	event.locals.user = user;
 
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
