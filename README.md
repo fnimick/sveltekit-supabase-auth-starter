@@ -60,3 +60,20 @@ To test this, open the magic link (from inbucket) in a different browser or devi
 requested it from. You should see a page with a message about the code verifier not being present.
 Then, open the link in the same browser or device you requested it from, and you should be logged
 in.
+
+## Notes on session / user safety and object member use
+
+Supabase recently added warnings when a `user` object is used from a fetched session on the server, since the
+session is restored from cookies without being validated. This occurs even if the
+user is validated (as they recommend) due to the way that the warning was implemented. See:
+https://github.com/supabase/auth-js/issues/873
+
+In this starter kit, the problem is resolved in the following way:
+
+- in the server hooks, the session is fetched and the user is fetched, as supabase recommends, and
+  then the fetched user is manually added to the session object, replacing the user warning proxy,
+  so it can be safely used without warning. See `hooks.server.ts`
+- in the layout code, if we are server-side rendering, we use the fetched session rather than
+  re-fetching in the layout loader, as the supabase example does. This both avoids a second session
+  fetch and and ensures that the most recent validated session, with the correct user property set,
+  is used. See `routes/layout.ts`

@@ -38,7 +38,7 @@ const createSupabaseClient: Handle = async ({ event, resolve }) => {
 			return { session: null, user: null };
 		}
 
-		// workaround for user object use message, see https://github.com/supabase/auth-js/issues/873#issuecomment-2081467385
+		// workaround for user object use message, see https://github.com/supabase/auth-js/issues/873
 		const newSession: Omit<Session, 'user'> & { user?: Session['user'] } = session;
 		delete newSession.user;
 		return { session: Object.assign({}, newSession, { user }), user };

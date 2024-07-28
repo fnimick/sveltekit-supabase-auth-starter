@@ -23,6 +23,7 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
 			});
 
 	// reuse session from server if this is a server load - avoids user object use message
+	// see: https://github.com/supabase/auth-js/issues/873
 	const session = isBrowser() ? (await supabase.auth.getSession()).data.session : data.session;
 
 	return { supabase, session };
