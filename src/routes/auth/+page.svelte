@@ -3,11 +3,13 @@
 	import { Auth } from '@supabase/auth-ui-svelte';
 	import { ThemeSupa } from '@supabase/auth-ui-shared';
 
-	$: next = $page.url.searchParams.get('next');
+	let next = $derived($page.url.searchParams.get('next'));
 
-	$: redirectTo = next
-		? `${$page.url.origin}/auth/callback?next=${encodeURIComponent(next)}`
-		: `${$page.url.origin}/auth/callback`;
+	let redirectTo = $derived(
+		next
+			? `${$page.url.origin}/auth/callback?next=${encodeURIComponent(next)}`
+			: `${$page.url.origin}/auth/callback`
+	);
 </script>
 
 <svelte:head>

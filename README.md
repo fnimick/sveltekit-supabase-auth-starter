@@ -1,4 +1,4 @@
-# Sveltekit + Supabase Auth Starter
+# Sveltekit + Svelte 5 + Supabase Auth Starter
 
 This is a starter template for [SvelteKit](https://kit.svelte.dev) apps with
 [Supabase](https://supabase.io) authentication. Uses the new Supabase SSR libraries rather than the

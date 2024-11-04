@@ -1,7 +1,9 @@
 <script lang="ts">
-	export let data;
+	import { invalidateAll } from '$app/navigation';
 
-	$: ({ session, supabase } = data);
+	let { data } = $props();
+
+	let { session, supabase } = $derived(data);
 </script>
 
 <h1>Welcome to SvelteKit + Supabase</h1>
@@ -11,8 +13,9 @@
 <div>
 	{#if session != null}
 		<p>You are logged in as {session.user.email}</p>
-		<button on:click={() => supabase.auth.signOut()}>Sign out</button>
+		<button onclick={() => supabase.auth.signOut()}>Sign out</button>
 	{:else}
 		<a href="auth">Sign In</a>
 	{/if}
+	<button onclick={() => invalidateAll()}>invalidateAll</button>
 </div>

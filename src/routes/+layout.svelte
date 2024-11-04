@@ -1,32 +1,22 @@
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { derived, writable } from 'svelte/store';
 
-	export let data;
+	let { data, children } = $props();
 
-	$: ({ supabase, session } = data);
+	let { supabase, session } = $derived(data);
 
-	let supabaseStore = writable<typeof supabase>();
-	$: supabaseStore.set(supabase);
-
-	// this is necessary to ensure that subscriptions to old supabase clients are cleaned up properly
-	// when a new client is retrieved from the loader.
-	let supabaseAuthStateChangeSubscriptionStore = derived(supabaseStore, ($supabaseStore, set) => {
+	$effect(() => {
 		const {
 			data: { subscription }
-		} = $supabaseStore.auth.onAuthStateChange((event, _session) => {
+		} = supabase.auth.onAuthStateChange((event, _session) => {
 			if (_session?.expires_at !== session?.expires_at) {
 				invalidate('supabase:auth');
 			}
 		});
-		set(subscription);
+		// this is necessary to ensure that subscriptions to old supabase clients are cleaned up properly
+		// when a new client is retrieved from the loader.
 		return subscription.unsubscribe;
-	});
-
-	onMount(() => {
-		return supabaseAuthStateChangeSubscriptionStore.subscribe(() => {});
 	});
 </script>
 
-<slot />
+{@render children?.()}
